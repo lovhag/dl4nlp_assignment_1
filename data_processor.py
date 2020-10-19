@@ -69,9 +69,16 @@ def get_lemmatized_text(spacy_parser, text):
 class DataProcessor:
     """Handles processing of data."""
 
-    def __init__(self, text_data, lemma_data, word_pos_data, sense_key_data):
+    def __init__(self, text_data, lemma_data, word_pos_data, sense_key_data, lemmatized_text_data=None, sense_encoded_text_data=None, sensed_lemma_data=None):
         self.data = pd.DataFrame({'text': text_data, 'lemma': lemma_data, 'word_pos': word_pos_data, 'sense_key': sense_key_data})
         self.parser = setup_spacy_parser()
+
+        if lemmatized_text_data:
+            self.data["lemmatized_text"] = lemmatized_text_data
+        if sense_encoded_text_data:
+            self.data["sense_encoded_text"] = sense_encoded_text_data
+        if sensed_lemma_data:
+            self.data["sensed_lemma"] = sensed_lemma_data
 
     def get_data(self):
         return self.data
@@ -104,7 +111,7 @@ class DataProcessor:
         def get_new_text(row):
             words = row[text_col].split(' ')
             new_text = words[:row.word_pos]+[row.sensed_lemma]+words[row.word_pos+1:]
-            return new_text
+            return " ".join(new_text)
 
         self.data['sensed_lemma'] = self.data.apply(get_sensed_lemma, axis=1)
         self.data['sense_encoded_text'] = self.data.apply(get_new_text, axis=1)
